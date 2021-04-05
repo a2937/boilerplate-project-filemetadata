@@ -2,6 +2,8 @@ var express = require('express');
 const bodyParser = require('body-parser')
 var cors = require('cors');
 const multer = require('multer');
+var fs = require("fs");
+var path = require("path");
 require('dotenv').config()
 
 var app = express();
@@ -15,7 +17,11 @@ var storage = multer.diskStorage({
     cb(null, 'uploads')
   },
   filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now())
+    var directory = "uploads";
+    if (fs.existsSync(directory) == false) {
+      fs.mkdirSync(directory, { recursive: true });
+    }
+    cb(null, path.basename(file.originalname))
   }
 });
 
@@ -25,7 +31,7 @@ app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
-app.post('/api/uploadfile', upload.single('myFile'), (req, res, next) => {
+app.post('/api/fileanalyse', upload.single('upfile'), (req, res, next) => {
   const file = req.file
   if (!file) {
     const error = new Error('Please upload a file')
